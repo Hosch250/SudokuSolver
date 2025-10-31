@@ -54,50 +54,43 @@ let print (board: Board): unit =
     |> Array2D.iteri (fun i j value ->
         printf "%s%s" (formatTile value) (if j = Array2D.length2 board - 1 then "\n" else ""))
 
-let printLine (line: Tile[]): unit =
-    printf "| "
+let board : int[,] = array2D [
+    [4; 0; 0; 7; 0; 3; 0; 5; 0]
+    [0; 0; 9; 8; 0; 4; 0; 0; 0]
+    [0; 8; 7; 2; 0; 0; 0; 6; 0]
+    [0; 0; 0; 0; 0; 0; 2; 3; 5]
+    [0; 3; 2; 6; 0; 5; 4; 9; 0]
+    [9; 5; 8; 0; 0; 0; 0; 0; 0]
+    [0; 4; 0; 0; 0; 7; 9; 2; 0]
+    [0; 0; 0; 4; 0; 6; 5; 0; 0]
+    [0; 6; 0; 5; 0; 8; 0; 0; 3]
+]
 
-    line
-    |> Array.map formatTile
-    |> Array.map (fun i -> printf "%s" i)
-    |> ignore
+let mappedBoard =
+    board
+    |> Array2D.map (fun i -> if i = 0 then Pencil([||]) else Number(i))
 
-    printfn " |"
-
-let board : Board = array2D [
-        [Number(4); Pencil([||]); Pencil([||]); Number(7); Pencil([||]); Number(3); Pencil([||]); Number(5); Pencil([||])]
-        [Pencil([||]); Pencil([||]); Number(9); Number(8); Pencil([||]); Number(4); Pencil([||]); Pencil([||]); Pencil([||])]
-        [Pencil([||]); Number(8); Number(7); Number(2); Pencil([||]); Pencil([||]); Pencil([||]); Number(6); Pencil([||])]
-        [Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||]); Number(2); Number(3); Number(5)]
-        [Pencil([||]); Number(3); Number(2); Number(6); Pencil([||]); Number(5); Number(4); Number(9); Pencil([||])]
-        [Number(9); Number(5); Number(8); Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||]); Pencil([||])]
-        [Pencil([||]); Number(4); Pencil([||]); Pencil([||]); Pencil([||]); Number(7); Number(9); Number(2); Pencil([||])]
-        [Pencil([||]); Pencil([||]); Pencil([||]); Number(4); Pencil([||]); Number(6); Number(5); Pencil([||]); Pencil([||])]
-        [Pencil([||]); Number(6); Pencil([||]); Number(5); Pencil([||]); Number(8); Pencil([||]); Pencil([||]); Number(3)]
-    ]
-
-
-let getPencilCount () =
+let getPencilCount (board: Board) =
     board
     |> Seq.cast<Tile>
     |> Seq.choose (|Pencil|_|)
     |> Seq.length
 
-let mutable pencilCount = getPencilCount ()
+let mutable pencilCount = getPencilCount mappedBoard
 
 while pencilCount > 0 do
-    board
+    mappedBoard
     |> Array2D.iteri (
         fun x y tile ->
             match tile with
             | Pencil _ ->
                 let point = { x = x; y = y }
-                let pencil = trimPencils point board
-                setTile point pencil board
+                let pencil = trimPencils point mappedBoard
+                setTile point pencil mappedBoard
             | _ -> ()
     )
 
-    let newPencilCount = getPencilCount ()
+    let newPencilCount = getPencilCount mappedBoard
     pencilCount <- if (newPencilCount = pencilCount) then -1 else newPencilCount
 
-print board
+print mappedBoard
