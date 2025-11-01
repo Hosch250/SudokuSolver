@@ -54,8 +54,8 @@ let onlyInSet (point: Point) (board: Board) =
             |> Seq.tryExactlyOne
 
         match value with
-        | Some s -> Number(s)
-        | None -> Pencil(set)
+        | Some s -> [|s|]
+        | None -> set
 
     let isOnlyOptionInSquare (set: Pencil) =
         let square = getSquare point board
@@ -74,8 +74,9 @@ let onlyInSet (point: Point) (board: Board) =
         | Pencil p -> 
             p
             |> isOnlyOptionInSquare
-            //|> isOnlyOptionInRow
-            //|> isOnlyOptionInCol
+            |> isOnlyOptionInRow
+            |> isOnlyOptionInCol
+            |> Pencil
         | _ -> board.[point.x, point.y]
 
     board
