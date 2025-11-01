@@ -25,9 +25,6 @@ let board : int[,] = array2D [
     [3; 5; 0; 0; 0; 0; 0; 2; 0]
 ]
 
-let mappedBoard =
-    board
-    |> Array2D.map (fun i -> if i = 0 then Pencil(allPencils) else Number(i))
 
 let getPencilCount (board: Board) =
     board
@@ -35,29 +32,24 @@ let getPencilCount (board: Board) =
     |> Seq.choose (|Pencil|_|)
     |> Seq.length
 
-let loopUntilNoChanges action = 
-    let mutable pencilCount = getPencilCount mappedBoard
+let loopUntilChange action board =
+    seq {0..8}
+    |> Seq.exists (fun x ->
+        seq{0..8}
+        |> Seq.exists (fun y -> action { x = x; y = y } board))
 
-    while pencilCount > 0 do
-        mappedBoard
-        |> Array2D.iteri (
-            fun x y tile ->
-                match tile with
-                | Pencil _ ->
-                    action ({ x = x; y = y })
-                | _ -> ()
-        )
+let rules = [setPencil; naive; onlyInSet]
+let rec runRules board =
+    let change =
+        rules
+        |> Seq.exists (fun rule -> loopUntilChange rule board)
+        
+    if change then runRules board
 
-        let newPencilCount = getPencilCount mappedBoard
-        pencilCount <- if (newPencilCount = pencilCount) then -1 else newPencilCount
+let mappedBoard =
+    board
+    |> Array2D.map (fun i -> if i = 0 then Pencil(allPencils) else Number(i))
 
-print mappedBoard
-printfn "-------------------"
-
-let rules = [naive; onlyInSet]
-loopUntilNoChanges (fun point -> (
-    rules
-    |> Seq.iter (fun rule -> loopUntilNoChanges (fun point -> rule point mappedBoard))
-))
+runRules mappedBoard
 
 print mappedBoard

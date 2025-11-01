@@ -12,7 +12,7 @@ type Board = Tile [,]
 
 type Point = { x: int; y: int }
 
-let allPencils = [|1; 2; 3; 4; 5; 6; 7; 8; 9|]
+let allPencils = [| 1..9 |]
 
 let getSquare (point: Point) (board: Board) : Tile[] =
     let startRow = point.x / 3 * 3
@@ -29,9 +29,4 @@ let getColumn (column: int) (board: Board): Tile[] =
     board.[*, column]
 
 let setTile (point: Point) (tile: Tile) (board: Board): unit =
-    let newTile =
-        match tile with
-        | Pencil p when p.Length = 1 -> Number(p.[0])
-        | _ -> tile
-
-    Array2D.set board point.x point.y newTile
+    Array2D.set board point.x point.y tile

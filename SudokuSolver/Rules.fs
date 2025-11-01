@@ -4,7 +4,8 @@ open Types
 /// this rule will filter the pencil marks based on known numbers.
 /// e.g. having a known 5 in the same row/column/square as the point
 /// being checked will remove `5` from the pencil set for this point
-let naive (point: Point) (board: Board) =
+/// returns false (because naively updating pencils doesn't affect the state of the board)
+let setPencil (point: Point) (board: Board) =
     let getExisting (known: Tile[]) (set: Pencil) =
         let existingNums = Seq.choose (|Number|_|) known
         Array.except existingNums set
@@ -31,14 +32,21 @@ let naive (point: Point) (board: Board) =
             |> Pencil
         | _ -> board.[point.x, point.y]
 
-    board
-    |> setTile point (
-        match tile with
-        | Pencil p when p.Length = 1 -> Number(p.[0])
-        | _ -> tile)
+    setTile point tile board
+    false
 
-/// this rule will filter the pencil marks based on whether they are the only valid option for a given mark in the row/column/square
-/// e.g. if a square is the only possible option for the number 5 its row/column/square it will be set to the number 5
+/// this rule will assign a number to a tile if only one possible value for that tile is valid
+/// returns true if a tile was set
+let naive (point: Point) (board: Board) =
+    match board.[point.x, point.y] with
+    | Pencil p when p.Length = 1 ->
+        setTile point (Number(p.[0])) board
+        true
+    | _ -> false
+
+/// this rule will assign a number to a tile based on whether it is the only valid option for a given number in the row/column/square
+/// e.g. if a square is the only possible option for the number 5 in its row/column/square it will be set to the number 5
+/// returns true if a tile was set
 let onlyInSet (point: Point) (board: Board) =
     let isOnlyOption (tiles: Tile[]) (set: Pencil) =
         let numCount (num: int) =
@@ -52,6 +60,11 @@ let onlyInSet (point: Point) (board: Board) =
             |> Seq.map (fun i -> (i, numCount i))
             |> Seq.choose (fun (num, count) -> if count.IsNone then None else Some num)
             |> Seq.tryExactlyOne
+
+        let x =
+            set 
+            |> Seq.map (fun i -> (i, numCount i))
+            |> Seq.toArray
 
         match value with
         | Some s -> [|s|]
@@ -79,8 +92,8 @@ let onlyInSet (point: Point) (board: Board) =
             |> Pencil
         | _ -> board.[point.x, point.y]
 
-    board
-    |> setTile point (
-        match tile with
-        | Pencil p when p.Length = 1 -> Number(p.[0])
-        | _ -> tile)
+    match tile with
+    | Pencil p when p.Length = 1 ->
+        setTile point (Number(p.[0])) board
+        true
+    | _ -> false
