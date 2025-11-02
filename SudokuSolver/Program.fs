@@ -14,23 +14,16 @@ let createBoard (input: int[,]) =
     |> Array2D.map (fun i -> if i = 0 then Pencil([||]) else Number(i))
 
 let board : int[,] = array2D [
-    [0; 3; 0; 0; 0; 0; 0; 7; 4]
-    [0; 0; 0; 0; 2; 0; 0; 0; 3]
-    [6; 0; 0; 0; 7; 1; 8; 0; 0]
-    [4; 0; 0; 7; 0; 0; 0; 3; 0]
-    [0; 9; 0; 0; 0; 0; 0; 5; 0]
-    [0; 8; 0; 0; 0; 9; 0; 0; 1]
-    [0; 0; 2; 9; 3; 0; 0; 0; 6]
-    [8; 0; 0; 0; 6; 0; 0; 0; 0]
-    [3; 5; 0; 0; 0; 0; 0; 2; 0]
+    [7; 0; 0; 0; 1; 0; 5; 0; 0]
+    [9; 0; 8; 0; 0; 0; 0; 3; 4]
+    [0; 0; 0; 8; 0; 0; 2; 0; 1]
+    [0; 0; 0; 5; 2; 0; 0; 0; 0]
+    [0; 3; 0; 0; 0; 0; 0; 1; 0]
+    [0; 0; 0; 0; 8; 4; 0; 0; 0]
+    [3; 0; 2; 0; 0; 8; 0; 0; 0]
+    [6; 9; 0; 0; 0; 0; 8; 0; 7]
+    [0; 0; 4; 0; 6; 0; 0; 0; 5]
 ]
-
-
-let getPencilCount (board: Board) =
-    board
-    |> Seq.cast<Tile>
-    |> Seq.choose (|Pencil|_|)
-    |> Seq.length
 
 let loopUntilChange action board =
     seq {0..8}
@@ -38,7 +31,7 @@ let loopUntilChange action board =
         seq{0..8}
         |> Seq.exists (fun y -> action { x = x; y = y } board))
 
-let rules = [setPencil; naive; onlyInSet]
+let rules = [setPencil; naive; onlyInSet; trimPencilsForExclusiveLineInSquare]
 let rec runRules board =
     let change =
         rules
