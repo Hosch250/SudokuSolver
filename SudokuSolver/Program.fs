@@ -31,11 +31,25 @@ let loopUntilChange action board =
         seq{0..8}
         |> Seq.exists (fun y -> action { x = x; y = y } board))
 
-let rules = [setPencil; naive; onlyInSet; trimPencilsForExclusiveLineInSquare]
+let runRule key point (board: Board) =
+    match key with
+    | nameof setPencil -> board.[point.x, point.y].IsPencil
+    | nameof naive -> board.[point.x, point.y].IsPencil
+    | nameof onlyInSet -> board.[point.x, point.y].IsPencil
+    | nameof trimPencilsForExclusiveLineInSquare -> point.x % 3 = point.y % 3
+    | _ -> raise (System.NotImplementedException ())
+
+let rules = dict [
+    nameof setPencil, setPencil
+    nameof naive, naive
+    nameof onlyInSet, onlyInSet
+    nameof trimPencilsForExclusiveLineInSquare, trimPencilsForExclusiveLineInSquare
+]
+
 let rec runRules board =
     let change =
         rules
-        |> Seq.exists (fun rule -> loopUntilChange rule board)
+        |> Seq.exists (fun rule -> loopUntilChange (fun point board -> runRule rule.Key point board && rule.Value point board) board)
         
     if change then runRules board
 
