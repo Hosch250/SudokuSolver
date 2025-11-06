@@ -43,7 +43,8 @@ let rules = dict [
     nameof setPencil, setPencil
     nameof naive, naive
     nameof onlyInSet, onlyInSet
-    nameof trimPencilsForExclusiveLineInSquare, trimPencilsForExclusiveLineInSquare
+    //nameof trimPencilsForExclusiveLineInSquare, trimPencilsForExclusiveLineInSquare
+    nameof combinations, combinations
 ]
 
 let rec runRules board =

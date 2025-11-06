@@ -24,17 +24,18 @@ let setPencil (point: Point) (board: Board) =
         let col = getColumn point.y board
         getExisting col set
 
-    let tile =
-        match board.[point.x, point.y] with
-        | Pencil p -> 
+    match board.[point.x, point.y] with
+    | Pencil p -> 
+        let tile =
             p
             |> getValidInSquare
             |> getValidInRow
             |> getValidInCol
-            |> Pencil
-        | _ -> board.[point.x, point.y]
 
-    setTile point tile board
+        if tile.Length <> p.Length then
+            setTile point (Pencil(tile)) board
+    | _ -> ()
+
     false
 
 /// this rule will assign a number to a tile if only one possible value for that tile is valid
@@ -237,3 +238,95 @@ let trimPencilsForExclusiveLineInSquare (point: Point) (board: Board) =
     let updateCol = hasOnlyOptionInCol ()
 
     updateRow || updateCol
+
+let combinations (point: Point) (board: Board) =
+    (*
+    Source - https://stackoverflow.com/questions/1222185
+    Posted by The_Ghost
+    Retrieved 2025-11-05, License - CC BY-SA 2.5
+    *)
+    let rec comb n l = 
+        match n, l with
+        | 0, _ -> [[]]
+        | _, [] -> []
+        | k, (x::xs) -> List.map ((@) [x]) (comb (k-1) xs) @ comb k xs
+
+    let combinationInSet (pencils: (Point * Pencil) list) =
+        let pencilCount = Seq.length pencils
+
+        match pencilCount with
+        | n when n < 3 -> false
+        | n when n >= 9 -> false
+        | n ->
+            let sets =
+                [ 2..(n - 1) ]
+                |> Seq.fold (fun acc next -> acc @ (comb next pencils)) []
+                |> Seq.map (fun i ->
+                    (i |> Seq.fold (fun acc (next, _) -> acc @ [next]) []),
+                    (i |> Seq.fold (fun acc (_, next) -> Enumerable.Union(acc, next).ToArray()) [||])
+                )
+                |> Seq.filter (fun (points, numbers) -> points.Length = numbers.Length)
+                |> Seq.toArray
+
+            let changesMade =
+                sets
+                |> Seq.map (fun (points, eliminatedPencils) -> (
+                    pencils
+                    |> Seq.filter (fun (point, _) -> points.Contains(point) |> not)
+                    |> Seq.map (fun (point, existingPencils) -> (
+                        let newPencils = existingPencils.Except(eliminatedPencils).ToArray()
+                        if newPencils.Length < existingPencils.Length then
+                            let tile = Pencil(newPencils)
+                            setTile point tile board
+                            true
+                        else
+                            false
+                    ))
+                    |> Seq.fold (fun acc next -> acc || next) false
+                ))
+                |> Seq.fold (fun acc next -> acc || next) false
+
+            changesMade
+            
+    let combinationsInRow () =
+        let tiles = getRow point.x board
+
+        let pencils =
+            [ 0..8 ]
+            |> Seq.map (fun i -> { point with y = i }, tiles.[i])
+            |> Seq.choose (fun (point, tile) -> match tile with | Pencil p -> Some (point, p) | _ -> None)
+            |> Seq.toList
+            
+        combinationInSet pencils
+            
+    let combinationsInCol () =
+        let tiles = getColumn point.x board
+
+        let pencils =
+            [ 0..8 ]
+            |> Seq.map (fun i -> { point with x = i }, tiles.[i])
+            |> Seq.choose (fun (point, tile) -> match tile with | Pencil p -> Some (point, p) | _ -> None)
+            |> Seq.toList
+            
+        combinationInSet pencils
+            
+    let combinationsInSquare () =
+        let tiles = getSquare point board
+
+        let xStart = (point.x / 3) * 3
+        let xs = [xStart; xStart + 1; xStart + 2]
+
+        let yStart = (point.y / 3) * 3
+        let ys = [yStart; yStart + 1; yStart + 2]
+
+        let pencils =
+            [ 0..8 ]
+            |> Seq.map (fun i -> { point with x = xs[i / 3]; y = ys[i % 3] }, tiles.[i])
+            |> Seq.choose (fun (point, tile) -> match tile with | Pencil p -> Some (point, p) | _ -> None)
+            |> Seq.toList
+            
+        combinationInSet pencils
+        
+    combinationsInRow ()
+    || combinationsInCol ()
+    || combinationsInSquare ()
