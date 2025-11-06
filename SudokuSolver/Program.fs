@@ -14,15 +14,15 @@ let createBoard (input: int[,]) =
     |> Array2D.map (fun i -> if i = 0 then Pencil([||]) else Number(i))
 
 let board : int[,] = array2D [
-    [7; 0; 0; 0; 1; 0; 5; 0; 0]
-    [9; 0; 8; 0; 0; 0; 0; 3; 4]
-    [0; 0; 0; 8; 0; 0; 2; 0; 1]
-    [0; 0; 0; 5; 2; 0; 0; 0; 0]
-    [0; 3; 0; 0; 0; 0; 0; 1; 0]
-    [0; 0; 0; 0; 8; 4; 0; 0; 0]
-    [3; 0; 2; 0; 0; 8; 0; 0; 0]
-    [6; 9; 0; 0; 0; 0; 8; 0; 7]
-    [0; 0; 4; 0; 6; 0; 0; 0; 5]
+    [0; 0; 0; 3; 0; 0; 9; 8; 0]
+    [0; 0; 0; 4; 0; 0; 2; 0; 0]
+    [1; 2; 0; 0; 0; 7; 0; 0; 0]
+    [0; 0; 1; 0; 0; 6; 0; 9; 0]
+    [0; 5; 0; 0; 9; 0; 0; 6; 0]
+    [0; 9; 0; 2; 0; 0; 5; 0; 0]
+    [0; 0; 0; 6; 0; 0; 0; 5; 8]
+    [0; 0; 7; 0; 0; 3; 0; 0; 0]
+    [0; 4; 2; 0; 0; 1; 0; 0; 0]
 ]
 
 let loopUntilChange action board =
@@ -37,13 +37,14 @@ let runRule key point (board: Board) =
     | nameof naive -> board.[point.x, point.y].IsPencil
     | nameof onlyInSet -> board.[point.x, point.y].IsPencil
     | nameof trimPencilsForExclusiveLineInSquare -> point.x % 3 = point.y % 3
+    | nameof combinations -> point.x % 3 = point.y % 3
     | _ -> raise (System.NotImplementedException ())
 
 let rules = dict [
     nameof setPencil, setPencil
     nameof naive, naive
     nameof onlyInSet, onlyInSet
-    //nameof trimPencilsForExclusiveLineInSquare, trimPencilsForExclusiveLineInSquare
+    nameof trimPencilsForExclusiveLineInSquare, trimPencilsForExclusiveLineInSquare
     nameof combinations, combinations
 ]
 

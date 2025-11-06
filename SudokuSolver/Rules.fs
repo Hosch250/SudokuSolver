@@ -139,9 +139,9 @@ let trimPencilsForExclusiveLineInSquare (point: Point) (board: Board) =
 
         let setBeingChecked =
             match point.x with
-            | 0 | 1 | 2 -> [square.[0]; square.[1]; square.[2]]
-            | 3 | 4 | 5 -> [square.[3]; square.[4]; square.[5]]
-            | 6 | 7 | 8 -> [square.[6]; square.[7]; square.[8]]
+            | 0 | 3 | 6 -> [square.[0]; square.[1]; square.[2]]
+            | 1 | 4 | 7 -> [square.[3]; square.[4]; square.[5]]
+            | 2 | 5 | 8 -> [square.[6]; square.[7]; square.[8]]
 
         let otherSets =
             match point.x with
@@ -189,9 +189,9 @@ let trimPencilsForExclusiveLineInSquare (point: Point) (board: Board) =
 
         let setBeingChecked =
             match point.y with
-            | 0 | 3 | 6 -> [square.[0]; square.[3]; square.[6]]
-            | 1 | 4 | 7 -> [square.[1]; square.[4]; square.[7]]
-            | 2 | 5 | 8 -> [square.[2]; square.[5]; square.[8]]
+            | 0 | 1 | 2 -> [square.[0]; square.[3]; square.[6]]
+            | 3 | 4 | 5 -> [square.[1]; square.[4]; square.[7]]
+            | 6 | 7 | 8 -> [square.[2]; square.[5]; square.[8]]
 
         let otherSets =
             match point.y with
@@ -327,6 +327,8 @@ let combinations (point: Point) (board: Board) =
             
         combinationInSet pencils
         
-    combinationsInRow ()
-    || combinationsInCol ()
-    || combinationsInSquare ()
+    let updateRow = combinationsInRow ()
+    let updateCol = combinationsInCol ()
+    let updateSquare = combinationsInSquare ()
+
+    updateRow || updateCol || updateSquare
