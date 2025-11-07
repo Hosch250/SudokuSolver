@@ -300,7 +300,7 @@ let combinations (point: Point) (board: Board) =
         combinationInSet pencils
             
     let combinationsInCol () =
-        let tiles = getColumn point.x board
+        let tiles = getColumn point.y board
 
         let pencils =
             [ 0..8 ]
